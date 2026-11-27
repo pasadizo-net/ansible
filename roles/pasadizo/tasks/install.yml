@@ -75,6 +75,18 @@
     owner: root
     group: root
 
+# The NaiveProxy outbound loads libcronet.so from the directory of the binary.
+- name: Extract libcronet.so
+  when: pasadizo_libcronet
+  ansible.builtin.unarchive:
+    src: "{{ pasadizo_download_dir }}/{{ _pasadizo_archive }}"
+    dest: "{{ _pasadizo_version_dir }}"
+    remote_src: "{{ not pasadizo_download_on_controller }}"
+    include: [libcronet.so]
+    creates: "{{ _pasadizo_version_dir }}/libcronet.so"
+    owner: root
+    group: root
+
 - name: Point the binary at this version
   ansible.builtin.file:
     src: "{{ _pasadizo_version_dir }}/pasadizo"
