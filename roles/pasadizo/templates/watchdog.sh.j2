@@ -27,11 +27,12 @@ probe() {
 
 for attempt in $(seq 1 "$RETRIES"); do
   FAILED=()
+  NFAILED=0
   for proxy in "${PROXIES[@]}"; do
-    probe "$proxy" || FAILED+=("$proxy")
+    probe "$proxy" || { FAILED+=("$proxy"); NFAILED=$((NFAILED + 1)); }
   done
 
-  if [ "${#FAILED[@]}" -eq 0 ]; then
+  if [ "$NFAILED" -eq 0 ]; then
     exit 0
   fi
 
