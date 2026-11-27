@@ -10,6 +10,7 @@
     pasadizo_watchdog_enabled: true
     pasadizo_watchdog_proxies: ["http://127.0.0.1:18080"]
     pasadizo_watchdog_retries: 1
+    pasadizo_tcp_tuning: true
     pasadizo_config:
       log:
         level: warn
@@ -40,6 +41,18 @@
       retries: 5
       delay: 2
       until: _fetch is succeeded
+
+    - name: Read the TCP settings
+      ansible.builtin.slurp:
+        src: "/proc/sys/net/ipv4/{{ item }}"
+      loop: [tcp_congestion_control, tcp_slow_start_after_idle]
+      register: _tcp
+
+    - name: Check the TCP settings
+      ansible.builtin.assert:
+        that:
+          - (_tcp.results[0].content | b64decode | trim) == 'bbr'
+          - (_tcp.results[1].content | b64decode | trim) == '0'
 
     - name: Run the watchdog once
       ansible.builtin.command: /usr/local/libexec/pasadizo-watchdog

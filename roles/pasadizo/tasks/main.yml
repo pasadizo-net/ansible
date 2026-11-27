@@ -13,6 +13,11 @@
     quiet: true
   tags: [pasadizo, pasadizo-install, pasadizo-config]
 
+- name: Tune the kernel TCP stack
+  ansible.builtin.import_tasks: tuning.yml
+  when: pasadizo_tcp_tuning
+  tags: [pasadizo, pasadizo-tuning]
+
 - name: Install the binary
   ansible.builtin.import_tasks: install.yml
   tags: [pasadizo, pasadizo-install]

@@ -2,7 +2,7 @@
  "collection_info": {
   "namespace": "pasadizo",
   "name": "pasadizo",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "authors": [
    "Parham Alvani <parham.alvani@gmail.com>"
   ],
@@ -17,7 +17,10 @@
    "GPL-3.0-or-later"
   ],
   "license_file": null,
-  "dependencies": {},
+  "dependencies": {
+   "ansible.posix": ">=1.5.0",
+   "community.general": ">=8.0.0"
+  },
   "repository": "https://github.com/pasadizo-net/ansible",
   "documentation": null,
   "homepage": null,
@@ -27,7 +30,7 @@
   "name": "FILES.json",
   "ftype": "file",
   "chksum_type": "sha256",
-  "chksum_sha256": "1bba486fbcd0f7d5880e262cc2933d108f310428a62073c0e24bac248f08141d",
+  "chksum_sha256": "46ffe537f66804d64893dc135b60e962226d1d90522323e641e941cb1fb58295",
   "format": 1
  },
  "format": 1

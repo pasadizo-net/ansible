@@ -17,7 +17,7 @@ The role:
 collections:
   - name: https://github.com/pasadizo-net/ansible.git
     type: git
-    version: v0.1.0
+    version: v0.2.0
 ```
 
 ```sh
@@ -56,8 +56,9 @@ All variables are in [`roles/pasadizo/defaults/main.yml`](roles/pasadizo/default
 | `pasadizo_capabilities` | `[]` | For example `CAP_NET_BIND_SERVICE` for ports below 1024, `CAP_NET_ADMIN` for `tun`. |
 | `pasadizo_config_diff` | `true` | Turn it off when the configuration holds secrets that must not appear in `--diff` output. |
 | `pasadizo_watchdog_enabled` | `false` | End-to-end health check through `pasadizo_watchdog_proxies`. |
+| `pasadizo_tcp_tuning` | `false` | BBR, fq and no slow start after idle for the whole host, persisted across reboots. |
 
-Tags: `pasadizo-install`, `pasadizo-config`, `pasadizo-watchdog`. A run with `-t pasadizo-config` writes and checks the configuration and restarts the service when it changed.
+Tags: `pasadizo-install`, `pasadizo-config`, `pasadizo-watchdog`, `pasadizo-tuning`. A run with `-t pasadizo-config` writes and checks the configuration and restarts the service when it changed.
 
 ## Testing
 
