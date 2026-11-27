@@ -1,8 +1,0 @@
-# {{ ansible_managed }}
-[Unit]
-Description=End-to-end health check of {{ pasadizo_service_name }}
-After={{ pasadizo_service_name }}.service
-
-[Service]
-Type=oneshot
-ExecStart=/usr/local/libexec/{{ pasadizo_service_name }}-watchdog
