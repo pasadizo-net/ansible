@@ -53,6 +53,9 @@ argument_specs:
       pasadizo_restart_on_change:
         type: bool
         description: Restart the service when the binary, the configuration or the unit changes.
+      pasadizo_libcronet:
+        type: bool
+        description: Install libcronet.so beside the binary, for the NaiveProxy outbound.
       pasadizo_capabilities:
         type: list
         elements: str

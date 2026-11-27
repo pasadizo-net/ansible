@@ -17,7 +17,7 @@ The role:
 collections:
   - name: https://github.com/pasadizo-net/ansible.git
     type: git
-    version: v0.2.0
+    version: v0.3.0
 ```
 
 ```sh
@@ -32,7 +32,7 @@ ansible-galaxy collection install -r requirements.yml
   roles:
     - role: pasadizo.pasadizo.pasadizo
       vars:
-        pasadizo_version: "1.15.0-alpha.14-pasadizo.3"
+        pasadizo_version: "1.15.0-alpha.14-pasadizo.7"
         pasadizo_watchdog_enabled: true
         pasadizo_watchdog_proxies: ["http://127.0.0.1:2080"]
         pasadizo_config:
@@ -53,6 +53,7 @@ All variables are in [`roles/pasadizo/defaults/main.yml`](roles/pasadizo/default
 | `pasadizo_config` | (required) | The configuration, as data. |
 | `pasadizo_version` | the latest release the collection was tested with | Release to install, without the leading `v`. |
 | `pasadizo_service_state` | `started` | `stopped` installs and checks everything without binding a port, for a staged cutover. |
+| `pasadizo_libcronet` | `true` | Install `libcronet.so` beside the binary, for the NaiveProxy outbound. |
 | `pasadizo_capabilities` | `[]` | For example `CAP_NET_BIND_SERVICE` for ports below 1024, `CAP_NET_ADMIN` for `tun`. |
 | `pasadizo_config_diff` | `true` | Turn it off when the configuration holds secrets that must not appear in `--diff` output. |
 | `pasadizo_watchdog_enabled` | `false` | End-to-end health check through `pasadizo_watchdog_proxies`. |

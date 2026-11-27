@@ -1,6 +1,6 @@
 ---
 # Release to install, without the leading "v".
-pasadizo_version: "1.15.0-alpha.14-pasadizo.3"
+pasadizo_version: "1.15.0-alpha.14-pasadizo.7"
 pasadizo_release_base_url: "https://github.com/pasadizo-net/pasadizo/releases/download"
 
 # The archive is downloaded on the controller and copied to the host, so a host
@@ -14,6 +14,10 @@ pasadizo_download_dir: /var/tmp/pasadizo-ansible
 # change and a restart.
 pasadizo_install_dir: /usr/local/lib/pasadizo
 pasadizo_binary: /usr/local/bin/pasadizo
+# Install libcronet.so beside the binary, for the NaiveProxy outbound. The
+# Linux archives carry it since 1.15.0-alpha.14-pasadizo.7; set it to false
+# for an older release.
+pasadizo_libcronet: true
 
 pasadizo_user: pasadizo
 pasadizo_group: pasadizo

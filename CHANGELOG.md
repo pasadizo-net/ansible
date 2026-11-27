@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.0
+
+- `pasadizo_libcronet` (on by default): install `libcronet.so` from the release archive beside the binary, for the NaiveProxy outbound. The Linux archives carry it since `1.15.0-alpha.14-pasadizo.7`; turn it off for an older release.
+- The default `pasadizo_version` is `1.15.0-alpha.14-pasadizo.7`.
+
 ## 0.2.0
 
 - `pasadizo_tcp_tuning` (opt-in): BBR congestion control, fq, and no TCP slow start after idle on the host, persisted in `/etc/sysctl.d/60-pasadizo.conf` and `/etc/modules-load.d/pasadizo.conf`; `pasadizo_sysctl_extra` adds more sysctls. The collection now depends on `ansible.posix` and `community.general`.
