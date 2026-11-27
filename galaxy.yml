@@ -1,0 +1,21 @@
+---
+namespace: pasadizo
+name: pasadizo
+version: 0.1.0
+readme: README.md
+authors:
+  - Parham Alvani <parham.alvani@gmail.com>
+description: Install and run Pasadizo, the proxy platform derived from sing-box, with a validated configuration and an optional end-to-end watchdog.
+license:
+  - GPL-3.0-or-later
+tags:
+  - proxy
+  - networking
+  - pasadizo
+dependencies: {}
+repository: https://github.com/pasadizo-net/ansible
+issues: https://github.com/pasadizo-net/ansible/issues
+build_ignore:
+  - .github
+  - tests
+  - "*.tar.gz"

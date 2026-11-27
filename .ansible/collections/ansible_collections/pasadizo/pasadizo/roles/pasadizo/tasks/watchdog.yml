@@ -1,0 +1,53 @@
+---
+- name: Install the watchdog
+  when: pasadizo_watchdog_enabled
+  block:
+    - name: Install the watchdog script
+      ansible.builtin.template:
+        src: watchdog.sh.j2
+        dest: "/usr/local/libexec/{{ pasadizo_service_name }}-watchdog"
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Install the watchdog units
+      ansible.builtin.template:
+        src: "watchdog.{{ item }}.j2"
+        dest: "/etc/systemd/system/{{ pasadizo_service_name }}-watchdog.{{ item }}"
+        owner: root
+        group: root
+        mode: "0644"
+      loop: [service, timer]
+
+    # The timer follows the service: a stopped service must not be restarted by
+    # its watchdog during a staged cutover.
+    - name: Set the watchdog timer state
+      ansible.builtin.systemd_service:
+        name: "{{ pasadizo_service_name }}-watchdog.timer"
+        daemon_reload: true
+        enabled: "{{ pasadizo_service_enabled and pasadizo_service_state != 'stopped' }}"
+        state: "{{ 'stopped' if pasadizo_service_state == 'stopped' else 'started' }}"
+
+- name: Remove the watchdog
+  when: not pasadizo_watchdog_enabled
+  block:
+    - name: Check for the watchdog timer
+      ansible.builtin.stat:
+        path: "/etc/systemd/system/{{ pasadizo_service_name }}-watchdog.timer"
+      register: _pasadizo_watchdog_timer
+
+    - name: Stop the watchdog timer
+      ansible.builtin.systemd_service:
+        name: "{{ pasadizo_service_name }}-watchdog.timer"
+        enabled: false
+        state: stopped
+      when: _pasadizo_watchdog_timer.stat.exists
+
+    - name: Remove the watchdog files
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "/etc/systemd/system/{{ pasadizo_service_name }}-watchdog.timer"
+        - "/etc/systemd/system/{{ pasadizo_service_name }}-watchdog.service"
+        - "/usr/local/libexec/{{ pasadizo_service_name }}-watchdog"

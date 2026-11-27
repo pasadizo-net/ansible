@@ -1,0 +1,84 @@
+---
+- name: Resolve the release archive
+  ansible.builtin.set_fact:
+    _pasadizo_archive: "pasadizo-{{ pasadizo_version }}-linux-{{ _pasadizo_arch }}.tar.gz"
+    _pasadizo_release_url: "{{ pasadizo_release_base_url }}/v{{ pasadizo_version }}"
+    _pasadizo_version_dir: "{{ pasadizo_install_dir }}/pasadizo-{{ pasadizo_version }}"
+  vars:
+    _pasadizo_arch: >-
+      {{ {'x86_64': 'amd64', 'amd64': 'amd64', 'aarch64': 'arm64', 'arm64': 'arm64', 'armv7l': 'armv7'}[ansible_facts['architecture']] }}
+
+- name: Create the group
+  ansible.builtin.group:
+    name: "{{ pasadizo_group }}"
+    system: true
+
+- name: Create the user
+  ansible.builtin.user:
+    name: "{{ pasadizo_user }}"
+    group: "{{ pasadizo_group }}"
+    system: true
+    create_home: false
+    home: /nonexistent
+    shell: /usr/sbin/nologin
+
+- name: Create the version directory
+  ansible.builtin.file:
+    path: "{{ _pasadizo_version_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Download the archive on the controller
+  when: pasadizo_download_on_controller
+  delegate_to: localhost
+  become: false
+  block:
+    - name: Create the download directory on the controller
+      ansible.builtin.file:
+        path: "{{ pasadizo_download_dir }}"
+        state: directory
+        mode: "0755"
+      run_once: true
+
+    - name: Download the archive and check it against checksums.txt
+      ansible.builtin.get_url:
+        url: "{{ _pasadizo_release_url }}/{{ _pasadizo_archive }}"
+        dest: "{{ pasadizo_download_dir }}/{{ _pasadizo_archive }}"
+        checksum: "sha256:{{ _pasadizo_release_url }}/checksums.txt"
+        mode: "0644"
+
+- name: Download the archive on the host
+  when: not pasadizo_download_on_controller
+  block:
+    - name: Create the download directory on the host
+      ansible.builtin.file:
+        path: "{{ pasadizo_download_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Download the archive and check it against checksums.txt
+      ansible.builtin.get_url:
+        url: "{{ _pasadizo_release_url }}/{{ _pasadizo_archive }}"
+        dest: "{{ pasadizo_download_dir }}/{{ _pasadizo_archive }}"
+        checksum: "sha256:{{ _pasadizo_release_url }}/checksums.txt"
+        mode: "0644"
+
+- name: Extract the binary
+  ansible.builtin.unarchive:
+    src: "{{ pasadizo_download_dir }}/{{ _pasadizo_archive }}"
+    dest: "{{ _pasadizo_version_dir }}"
+    remote_src: "{{ not pasadizo_download_on_controller }}"
+    include: [pasadizo]
+    creates: "{{ _pasadizo_version_dir }}/pasadizo"
+    owner: root
+    group: root
+
+- name: Point the binary at this version
+  ansible.builtin.file:
+    src: "{{ _pasadizo_version_dir }}/pasadizo"
+    dest: "{{ pasadizo_binary }}"
+    state: link
+    force: true
+  notify: Restart pasadizo
