@@ -1,0 +1,41 @@
+---
+# Kernel TCP settings for a proxy on long, lossy paths. Opt-in: they change the
+# whole host, not only Pasadizo. They apply to new connections at once and stay
+# across reboots (sysctl.d and modules-load.d).
+- name: Load the congestion control module at boot
+  ansible.builtin.copy:
+    content: "tcp_{{ pasadizo_tcp_congestion_control }}\n"
+    dest: /etc/modules-load.d/pasadizo.conf
+    owner: root
+    group: root
+    mode: "0644"
+  when: pasadizo_tcp_congestion_control not in ['reno', 'cubic']
+
+- name: Read the available congestion controls
+  ansible.builtin.slurp:
+    src: /proc/sys/net/ipv4/tcp_available_congestion_control
+  register: _pasadizo_tcp_available
+
+- name: Load the congestion control module now
+  community.general.modprobe:
+    name: "tcp_{{ pasadizo_tcp_congestion_control }}"
+    state: present
+  when: pasadizo_tcp_congestion_control not in (_pasadizo_tcp_available.content | b64decode).split()
+
+- name: Set the TCP sysctls
+  ansible.posix.sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    sysctl_file: /etc/sysctl.d/60-pasadizo.conf
+    sysctl_set: true
+    reload: true
+    state: present
+  loop: "{{ _pasadizo_sysctl | dict2items }}"
+  loop_control:
+    label: "{{ item.key }} = {{ item.value }}"
+  vars:
+    _pasadizo_sysctl: >-
+      {{ {'net.ipv4.tcp_congestion_control': pasadizo_tcp_congestion_control,
+          'net.core.default_qdisc': pasadizo_tcp_default_qdisc,
+          'net.ipv4.tcp_slow_start_after_idle': 0}
+         | combine(pasadizo_sysctl_extra) }}

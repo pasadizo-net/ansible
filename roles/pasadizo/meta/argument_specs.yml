@@ -63,6 +63,18 @@ argument_specs:
       pasadizo_service_extra:
         type: str
         description: Extra lines for the [Service] section.
+      pasadizo_tcp_tuning:
+        type: bool
+        description: Set BBR, fq and no slow start after idle on the host (sysctl.d and modules-load.d).
+      pasadizo_tcp_congestion_control:
+        type: str
+        description: TCP congestion control for the host.
+      pasadizo_tcp_default_qdisc:
+        type: str
+        description: Default queueing discipline for the host.
+      pasadizo_sysctl_extra:
+        type: dict
+        description: More sysctls written to the same file.
       pasadizo_watchdog_enabled:
         type: bool
         description: Install the end-to-end watchdog.

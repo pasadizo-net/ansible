@@ -42,6 +42,16 @@ pasadizo_limit_nofile: 1048576
 # Extra lines for the [Service] section.
 pasadizo_service_extra: ""
 
+# Kernel TCP tuning for a proxy on long, lossy paths: BBR congestion control
+# with fq pacing, and no slow start after an idle period, so a tunnel that
+# carried no traffic for a moment does not restart at a small congestion window.
+# Opt-in, because it changes the whole host, not only Pasadizo.
+pasadizo_tcp_tuning: false
+pasadizo_tcp_congestion_control: bbr
+pasadizo_tcp_default_qdisc: fq
+# More sysctls for the same file, e.g. {"net.ipv4.tcp_rmem": "4096 131072 16777216"}.
+pasadizo_sysctl_extra: {}
+
 # Watchdog: every pasadizo_watchdog_interval, fetch the URLs through each proxy
 # and restart the service when a proxy fails every retry, at most once per
 # cooldown (seconds). It catches a process that accepts connections but cannot
