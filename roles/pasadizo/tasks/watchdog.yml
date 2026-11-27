@@ -2,6 +2,14 @@
 - name: Install the watchdog
   when: pasadizo_watchdog_enabled
   block:
+    - name: Create the script directory
+      ansible.builtin.file:
+        path: /usr/local/libexec
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
     - name: Install the watchdog script
       ansible.builtin.template:
         src: watchdog.sh.j2
