@@ -20,4 +20,5 @@ issues: https://github.com/pasadizo-net/ansible/issues
 build_ignore:
   - .github
   - tests
+  - .ansible
   - "*.tar.gz"
