@@ -1,0 +1,9 @@
+---
+- name: Restart pasadizo
+  ansible.builtin.systemd_service:
+    name: "{{ pasadizo_service_name }}"
+    daemon_reload: true
+    state: restarted
+  when:
+    - pasadizo_restart_on_change
+    - pasadizo_service_state != 'stopped'

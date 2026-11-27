@@ -1,0 +1,10 @@
+# {{ ansible_managed }}
+[Unit]
+Description=Run the {{ pasadizo_service_name }} health check every {{ pasadizo_watchdog_interval }}
+
+[Timer]
+OnBootSec={{ pasadizo_watchdog_interval }}
+OnUnitActiveSec={{ pasadizo_watchdog_interval }}
+
+[Install]
+WantedBy=timers.target

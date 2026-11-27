@@ -1,0 +1,87 @@
+---
+# Integration test: install Pasadizo on this machine with a local mixed proxy,
+# then fetch a page through it. Run as `ansible-playbook -i localhost, -c local
+# tests/playbook.yml` on a host with systemd and passwordless sudo.
+- name: Install Pasadizo
+  hosts: all
+  become: true
+  vars:
+    pasadizo_download_on_controller: false
+    pasadizo_watchdog_enabled: true
+    pasadizo_watchdog_proxies: ["http://127.0.0.1:18080"]
+    pasadizo_watchdog_retries: 1
+    pasadizo_config:
+      log:
+        level: warn
+      inbounds:
+        - type: mixed
+          tag: in
+          listen: 127.0.0.1
+          listen_port: 18080
+      outbounds:
+        - type: direct
+          tag: direct
+      route:
+        final: direct
+  roles:
+    - pasadizo.pasadizo.pasadizo
+
+- name: Check Pasadizo
+  hosts: all
+  become: true
+  tasks:
+    - name: Fetch a page through the proxy
+      ansible.builtin.uri:
+        url: https://www.google.com/generate_204
+        status_code: 204
+      environment:
+        https_proxy: http://127.0.0.1:18080
+      register: _fetch
+      retries: 5
+      delay: 2
+      until: _fetch is succeeded
+
+    - name: Run the watchdog once
+      ansible.builtin.command: /usr/local/libexec/pasadizo-watchdog
+      changed_when: false
+
+    - name: Read the service
+      ansible.builtin.systemd_service:
+        name: pasadizo
+      register: _service
+
+    - name: Check that the service runs, and not as root
+      ansible.builtin.assert:
+        that:
+          - _service.status.ActiveState == 'active'
+          - _service.status.User == 'pasadizo'
+
+- name: Reject an invalid configuration
+  hosts: all
+  become: true
+  tasks:
+    - name: Apply a configuration that `pasadizo check` refuses
+      block:
+        - name: Run the role with an invalid configuration
+          ansible.builtin.include_role:
+            name: pasadizo.pasadizo.pasadizo
+          vars:
+            pasadizo_download_on_controller: false
+            pasadizo_config:
+              inbounds:
+                - type: no-such-type
+                  tag: in
+
+        - name: The role must have failed
+          ansible.builtin.fail:
+            msg: The role accepted a configuration that pasadizo check refuses.
+      rescue:
+        - name: The old configuration must stay
+          ansible.builtin.command: grep -q 18080 /etc/pasadizo/config.json
+          changed_when: false
+          when: ansible_failed_task.name != 'The role must have failed'
+
+        - name: Propagate a role that did not fail
+          ansible.builtin.fail:
+            msg: "{{ ansible_failed_result.msg }}"
+          when: ansible_failed_task.name == 'The role must have failed'
